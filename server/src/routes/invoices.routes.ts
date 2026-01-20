@@ -6,7 +6,9 @@ export const invoicesRouter = Router();
 
 invoicesRouter.get("/", async (req, res, next) => {
   try {
-    const { sort, order } = parseSortParams(req.query);
+    const { sort, order } = parseSortParams(
+      req.query as Record<string, unknown>,
+    );
     const invoices = await listInvoice(sort, order);
     res.json(invoices);
   } catch (error) {
