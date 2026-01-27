@@ -1,4 +1,4 @@
-export function isOverdueUnPaid(
+export function isOverdueUnpaid(
   invoice: {
     status: "paid" | "unpaid";
     dueDate: Date;

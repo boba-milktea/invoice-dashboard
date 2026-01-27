@@ -1,36 +1,33 @@
 import { prisma } from "../db/client.js";
-import { isOverdueUnPaid } from "../utils/date.js";
+import { isOverdueUnpaid } from "../utils/date.js";
+import { buildInvoiceWhere } from "../utils/filters.js";
+import type { InvoiceFilters } from "../utils/filters.js";
 
 export type ComputedStatus = "paid" | "unpaid" | "overdue";
+export type Params = {
+  sort: "dueDate" | "amountCents";
+  order: "asc" | "desc";
+  filters: InvoiceFilters;
+};
 
-/** we use computed properties. The name of the object properties is calculated at runtime
- * In backend, request paramters are dynamic, so we cannot use static object keys. But libraries like Prisma
- * expect exact object structure.
- * To work around this, we can use computed properties in TypeScript as shown below.
- */
+export async function listInvoices({ sort, order, filters }: Params) {
+  const { where, empty } = buildInvoiceWhere(filters);
+  if (empty) return [];
 
-//   const orderByObj: Record<string, "asc" | "desc"> = {};
-//   orderByObj[sort] = order;
-
-export async function listInvoice(
-  sort: "dueDate" | "amountCents",
-  order: "asc" | "desc",
-) {
   const invoices = await prisma.invoice.findMany({
-    orderBy: {
-      [sort]: order,
-    },
+    where,
+    orderBy: { [sort]: order },
   });
 
   return invoices.map((invoice) => ({
     id: invoice.id,
     clientName: invoice.clientName,
-    amountCents: invoice.amountCents,
+    amount: invoice.amountCents / 100, // presentation value
     currency: invoice.currency,
     issueDate: invoice.issueDate,
     dueDate: invoice.dueDate,
     status: invoice.status,
-    computedStatus: (isOverdueUnPaid(invoice)
+    computedStatus: (isOverdueUnpaid(invoice)
       ? "overdue"
       : invoice.status) as ComputedStatus,
   }));

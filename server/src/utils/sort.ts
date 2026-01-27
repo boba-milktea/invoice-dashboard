@@ -1,19 +1,24 @@
-const ALLOWED_SORT_FIELDS = new Set(["dueDate", "amountCents"]);
-const ALLOWED_ORDER = new Set(["asc", "desc"]);
+export type SortField = "dueDate" | "amountCents";
+export type SortOrder = "asc" | "desc";
+
+const ALLOWED_SORT_FIELDS: readonly SortField[] = ["dueDate", "amountCents"];
+
+const ALLOWED_ORDER: readonly SortOrder[] = ["asc", "desc"];
 
 export function parseSortParams(query: Record<string, unknown>): {
-  sort: "dueDate" | "amountCents";
-  order: "asc" | "desc";
+  sort: SortField;
+  order: SortOrder;
 } {
-  const sortRaw = String(query.sort ?? "dueDate");
-  const orderRaw = String(query.order ?? "asc");
+  const sortRaw = typeof query.sort === "string" ? query.sort : "dueDate";
+  const orderRaw = typeof query.order === "string" ? query.order : "asc";
 
-  const sort = (ALLOWED_SORT_FIELDS.has(sortRaw) ? sortRaw : "dueDate") as
-    | "dueDate"
-    | "amountCents";
-  const order = (ALLOWED_ORDER.has(orderRaw) ? orderRaw : "asc") as
-    | "asc"
-    | "desc";
+  const sort = ALLOWED_SORT_FIELDS.includes(sortRaw as SortField)
+    ? (sortRaw as SortField)
+    : "dueDate";
+
+  const order = ALLOWED_ORDER.includes(orderRaw as SortOrder)
+    ? (orderRaw as SortOrder)
+    : "asc";
 
   return { sort, order };
 }
