@@ -256,7 +256,7 @@ export default function Dashboard() {
               htmlFor="minAmount"
               className="text-xs font-medium text-slate-700"
             >
-              Min amount (cents)
+              Min amount
             </label>
             <input
               id="minAmount"
