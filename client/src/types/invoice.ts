@@ -3,7 +3,7 @@ export type InvoiceComputedStatus = "paid" | "unpaid" | "overdue";
 export interface Invoice {
   id: string;
   clientName: string;
-  amountCents: number;
+  amount: number;
   currency: string;
   issueDate: string;
   dueDate: string;

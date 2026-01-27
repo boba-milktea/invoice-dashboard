@@ -5,16 +5,16 @@ import type { Invoice } from "../types/invoice";
 
 type Props = {
   invoices: Invoice[];
-  sort: "dueDate" | "amountCents";
+  sort: "dueDate" | "amount";
   order: "asc" | "desc";
-  onChangeSort: (sort: "dueDate" | "amountCents") => void;
+  onChangeSort: (sort: "dueDate" | "amount") => void;
 };
 
-function formatMoney(amountCents: number, currency: string) {
-  return new Intl.NumberFormat(undefined, {
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat("be-BE", {
     style: "currency",
     currency,
-  }).format(amountCents / 100);
+  }).format(amount);
 }
 
 function formatDate(isoDateString: string) {
@@ -66,9 +66,9 @@ export default function InvoiceTable({
           />
           <SortButton
             label="Amount"
-            active={sort === "amountCents"}
+            active={sort === "amount"}
             order={order}
-            onClick={() => onChangeSort("amountCents")}
+            onClick={() => onChangeSort("amount")}
           />
         </div>
       </CardHeader>
@@ -98,7 +98,7 @@ export default function InvoiceTable({
                     {invoice.clientName}
                   </td>
                   <td className="border-b border-slate-100 px-5 py-3 text-slate-700">
-                    {formatMoney(invoice.amountCents, invoice.currency)}
+                    {formatMoney(invoice.amount, invoice.currency)}
                   </td>
                   <td className="border-b border-slate-100 px-5 py-3 text-slate-700">
                     {formatDate(invoice.dueDate)}
