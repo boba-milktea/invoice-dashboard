@@ -1,5 +1,7 @@
 import type { Invoice, Kpis, PaidUnPaidChart } from "../types/invoice";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 export type InvoiceApiFilters = {
   status?: "paid" | "unpaid";
   overdue?: boolean;
@@ -8,21 +10,25 @@ export type InvoiceApiFilters = {
 };
 
 export async function getJson<T>(url: string): Promise<T> {
-  try {
   const response = await fetch(url);
-    if (!response.ok)
-      throw new Error(`Error fetching ${url}: ${response.statusText}`);
-    return response.json() as Promise<T>;
-  } catch (error) {
-    console.error(error);
-    throw error;
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`HTTP ${response.status}: ${text}`);
   }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const text = await response.text();
+    throw new Error(`Expected JSON but got: ${text.slice(0, 120)}`);
+  }
+
+  return response.json() as Promise<T>;
 }
 
 export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
 
   const params = new URLSearchParams();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   if (filters?.status) params.set("status", filters.status);
   if (filters?.overdue === true) params.set("overdue", "true");
@@ -34,11 +40,9 @@ export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
   if (filters?.client) params.set("client", filters.client);
 
   const qs = params.toString();
-    return qs.length > 0
-      ? getJson<Kpis>(`${apiBaseUrl}/api/kpis?${qs}`)
-      : getJson<Kpis>(`${apiBaseUrl}/api/kpis`);
- 
+    return getJson<Kpis>( qs ? `${apiBaseUrl}/api/kpis?${qs}` : `${apiBaseUrl}/api/kpis`);
 }
+
 
 export function fetchInvoices(
   sort: "dueDate" | "amount" = "dueDate",
@@ -47,7 +51,6 @@ export function fetchInvoices(
 ): Promise<Invoice[]> {
 
   const params = new URLSearchParams({ sort, order });
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   if (filters?.status) params.set("status", filters.status);
   if (filters?.overdue === true) params.set("overdue", "true");
 
@@ -63,8 +66,5 @@ export function fetchInvoices(
 
 
 export function fetchPaidUnpaidChart(): Promise<PaidUnPaidChart> {
-  
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
     return getJson<PaidUnPaidChart>(`${apiBaseUrl}/api/charts/paid-unpaid`);
-  
 }
