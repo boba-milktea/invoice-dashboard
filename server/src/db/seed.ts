@@ -1,4 +1,5 @@
 import { prisma } from "./client.js";
+import { InvoiceStatus } from "../generated/prisma/enums.js";
 
 const CLIENTS = [
   "Acme BV",
@@ -34,12 +35,13 @@ async function main() {
 
   const data = Array.from({ length: COUNT }, (_, i) => {
     const { issueDate, dueDate } = randomIssueAndDueDates();
-    const status = Math.random() < 0.65 ? "paid" : "unpaid";
+    const status: typeof InvoiceStatus[keyof typeof InvoiceStatus] =
+      Math.random() < 0.65 ? InvoiceStatus.paid : InvoiceStatus.unpaid;
 
     let adjustedDueDate = dueDate;
 
     // ~35% of unpaid invoices become overdue
-    if (status === "unpaid" && Math.random() < 0.35) {
+    if (status === InvoiceStatus.unpaid && Math.random() < 0.35) {
       adjustedDueDate = new Date();
       adjustedDueDate.setDate(adjustedDueDate.getDate() - randomInt(1, 30));
     }
