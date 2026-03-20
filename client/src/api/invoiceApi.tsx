@@ -16,6 +16,7 @@ export async function getJson<T>(url: string): Promise<T> {
 
 export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
   const params = new URLSearchParams();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   if (filters?.status) params.set("status", filters.status);
   if (filters?.overdue === true) params.set("overdue", "true");
@@ -26,10 +27,12 @@ export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
 
   if (filters?.client) params.set("client", filters.client);
 
+
+
   const qs = params.toString();
   return qs.length > 0
-    ? getJson<Kpis>(`/api/kpis?${qs}`)
-    : getJson<Kpis>("/api/kpis");
+    ? getJson<Kpis>(`${apiBaseUrl}/api/kpis?${qs}`)
+    : getJson<Kpis>(`${apiBaseUrl}/api/kpis`);
 }
 
 export function fetchInvoices(
