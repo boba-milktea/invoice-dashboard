@@ -8,13 +8,19 @@ export type InvoiceApiFilters = {
 };
 
 export async function getJson<T>(url: string): Promise<T> {
+  try {
   const response = await fetch(url);
-  if (!response.ok)
-    throw new Error(`Error fetching ${url}: ${response.statusText}`);
-  return response.json() as Promise<T>;
+    if (!response.ok)
+      throw new Error(`Error fetching ${url}: ${response.statusText}`);
+    return response.json() as Promise<T>;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
+
   const params = new URLSearchParams();
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,12 +33,11 @@ export function fetchKpis(filters?: InvoiceApiFilters): Promise<Kpis> {
 
   if (filters?.client) params.set("client", filters.client);
 
-
-
   const qs = params.toString();
-  return qs.length > 0
-    ? getJson<Kpis>(`${apiBaseUrl}/api/kpis?${qs}`)
-    : getJson<Kpis>(`${apiBaseUrl}/api/kpis`);
+    return qs.length > 0
+      ? getJson<Kpis>(`${apiBaseUrl}/api/kpis?${qs}`)
+      : getJson<Kpis>(`${apiBaseUrl}/api/kpis`);
+ 
 }
 
 export function fetchInvoices(
@@ -40,8 +45,9 @@ export function fetchInvoices(
   order: "asc" | "desc" = "asc",
   filters?: InvoiceApiFilters,
 ): Promise<Invoice[]> {
-  const params = new URLSearchParams({ sort, order });
 
+  const params = new URLSearchParams({ sort, order });
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   if (filters?.status) params.set("status", filters.status);
   if (filters?.overdue === true) params.set("overdue", "true");
 
@@ -51,9 +57,14 @@ export function fetchInvoices(
 
   if (filters?.client) params.set("client", filters.client);
 
-  return getJson<Invoice[]>(`/api/invoices?${params.toString()}`);
+  return getJson<Invoice[]>(`${apiBaseUrl}/api/invoices?${params.toString()}`);
+
 }
 
+
 export function fetchPaidUnpaidChart(): Promise<PaidUnPaidChart> {
-  return getJson<PaidUnPaidChart>("/api/charts/paid-unpaid");
+  
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    return getJson<PaidUnPaidChart>(`${apiBaseUrl}/api/charts/paid-unpaid`);
+  
 }
