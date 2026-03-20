@@ -7,8 +7,22 @@ import { chartsRouter } from "./routes/charts.routes.js";
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    process.env.CORS_ORIGIN,
+  ].filter((origin): origin is string => Boolean(origin)),
+};
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+        if (!origin || corsOptions.origin.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
 }));
 app.use(express.json());
 
