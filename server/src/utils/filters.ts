@@ -1,5 +1,7 @@
 import type { Prisma } from "../generated/prisma/client.js";
 
+export const MAX_CLIENT_FILTER_LENGTH = 200;
+
 export type InvoiceFilters = {
   status?: "paid" | "unpaid";
   overdue?: boolean;
@@ -58,6 +60,12 @@ export function parseInvoiceFilters(
     const trimmed = query.client.trim();
     if (trimmed.length === 0) {
       return { ok: false, error: "client must be non-empty if provided" };
+    }
+    if (trimmed.length > MAX_CLIENT_FILTER_LENGTH) {
+      return {
+        ok: false,
+        error: `client must be at most ${MAX_CLIENT_FILTER_LENGTH} characters`,
+      };
     }
     filters.client = trimmed;
   }

@@ -1,4 +1,6 @@
-import { prisma } from "./client.js";
+import { getPrisma } from "./client.js";
+
+const prisma = getPrisma();
 import { InvoiceStatus } from "../generated/prisma/enums.js";
 
 const CLIENTS = [

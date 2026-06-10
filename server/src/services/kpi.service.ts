@@ -1,21 +1,26 @@
-import { prisma } from "../db/client.js";
+import { getPrisma } from "../db/client.js";
+import { mockGetKpis, isMockMode } from "../mock/invoices.js";
 import { isOverdueUnpaid } from "../utils/date.js";
 import { buildInvoiceWhere } from "../utils/filters.js";
 import type { InvoiceFilters } from "../utils/filters.js";
 
 export async function getKpis(filters: InvoiceFilters) {
+  if (isMockMode()) {
+    return mockGetKpis(filters);
+  }
+
   const { where, empty } = buildInvoiceWhere(filters);
   if (empty) {
     return { totalInvoices: 0, unpaid: 0, overdue: 0, needsAttention: 0 };
   }
 
-  const totalInvoices = await prisma.invoice.count({ where });
+  const totalInvoices = await getPrisma().invoice.count({ where });
 
-  const unpaid = await prisma.invoice.count({
+  const unpaid = await getPrisma().invoice.count({
     where: { ...where, status: "unpaid" },
   });
 
-  const unpaidInvoices = await prisma.invoice.findMany({
+  const unpaidInvoices = await getPrisma().invoice.findMany({
     where: { ...where, status: "unpaid" },
     select: { dueDate: true, status: true, amountCents: true },
   });

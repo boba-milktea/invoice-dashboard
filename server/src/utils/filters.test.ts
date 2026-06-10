@@ -49,6 +49,13 @@ describe("parseInvoiceFilters", () => {
     const r = parseInvoiceFilters({ client: "   " });
     expect(r.ok).toBe(false);
   });
+
+  it("rejects client longer than 200 characters", () => {
+    const r = parseInvoiceFilters({ client: "a".repeat(201) });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error).toContain("200");
+  });
 });
 
 describe("buildInvoiceWhere", () => {

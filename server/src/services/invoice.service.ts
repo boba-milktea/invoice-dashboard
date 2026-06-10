@@ -1,4 +1,5 @@
-import { prisma } from "../db/client.js";
+import { getPrisma } from "../db/client.js";
+import { mockListInvoices, isMockMode } from "../mock/invoices.js";
 import { isOverdueUnpaid } from "../utils/date.js";
 import { buildInvoiceWhere } from "../utils/filters.js";
 import type { InvoiceFilters } from "../utils/filters.js";
@@ -11,12 +12,17 @@ export type Params = {
 };
 
 export async function listInvoices({ sort, order, filters }: Params) {
+  if (isMockMode()) {
+    return mockListInvoices({ sort, order, filters });
+  }
+
   const { where, empty } = buildInvoiceWhere(filters);
   if (empty) return [];
 
-  const invoices = await prisma.invoice.findMany({
+  const invoices = await getPrisma().invoice.findMany({
     where,
     orderBy: { [sort]: order },
+    take: 1000,
   });
 
   return invoices.map((invoice) => ({

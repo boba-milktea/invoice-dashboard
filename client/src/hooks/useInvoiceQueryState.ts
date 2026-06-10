@@ -21,9 +21,11 @@ function parseUrlMinAmount(value: string | null): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
+const MAX_CLIENT_LENGTH = 200;
+
 function parseUrlClient(value: string | null): string | null {
   if (value === null) return null;
-  const t = value.trim();
+  const t = value.trim().slice(0, MAX_CLIENT_LENGTH);
   return t.length > 0 ? t : null;
 }
 
@@ -55,7 +57,7 @@ export function useInvoiceQueryState() {
   // Debounce client input -> effective client filter
   useEffect(() => {
     const handle = window.setTimeout(() => {
-      const trimmed = clientInput.trim();
+      const trimmed = clientInput.trim().slice(0, MAX_CLIENT_LENGTH);
       setClient(trimmed.length > 0 ? trimmed : null);
     }, 350);
 
